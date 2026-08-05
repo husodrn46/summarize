@@ -224,4 +224,31 @@ describe("runCliModel regressions", () => {
       }),
     ).rejects.toThrow("CLI returned empty output");
   });
+
+  it("surfaces structured Codex failures from stdout", async () => {
+    await expect(
+      runCliModel({
+        provider: "codex",
+        prompt: "hi",
+        model: "gpt-missing",
+        allowTools: false,
+        timeoutMs: 1000,
+        env: {},
+        config: null,
+        execFileImpl: (_cmd, _args, _opts, cb) => {
+          cb(
+            Object.assign(new Error("Command failed"), { code: 1 }),
+            JSON.stringify({
+              type: "turn.failed",
+              error: {
+                message: JSON.stringify({ error: { message: "Model access denied." } }),
+              },
+            }),
+            "",
+          );
+          return { stdin: { write() {}, end() {} } } as unknown as ChildProcess;
+        },
+      }),
+    ).rejects.toThrow("Model access denied.");
+  });
 });

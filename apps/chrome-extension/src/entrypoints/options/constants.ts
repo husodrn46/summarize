@@ -1,4 +1,5 @@
 export const optionsTabStorageKey = "summarize:options-tab";
+export const optionsLogSourceStorageKey = "summarize:options-log-source";
 
 export const languagePresets = [
   "auto",

@@ -5,6 +5,8 @@
 ### Fixes
 
 - Chrome extension: restore Video + Slides capture from toolbar-opened side panels by granting production builds the visible-tab access Chrome requires.
+- Chrome extension: open daemon failures on `daemon.err.log` and preserve structured Codex backend errors in the displayed diagnostics.
+- Codex CLI: map the plain `gpt-5.6` model name to `gpt-5.6-sol` while keeping Terra explicit.
 - Summaries: structure multi-point pages and discussion threads as scannable Markdown blocks instead of dense prose.
 
 ### Documentation

@@ -1,4 +1,5 @@
 import { getLocalStorage, type LocalStorageLike } from "../../lib/local-storage";
+import { optionsLogSourceStorageKey, optionsTabStorageKey } from "../options/constants";
 import { createErrorController } from "./error-controller";
 import { createHeaderController } from "./header-controller";
 import type { PanelState } from "./types";
@@ -6,8 +7,6 @@ import type { PanelState } from "./types";
 type FeedbackEventTarget = {
   addEventListener: (type: string, listener: EventListener) => void;
 };
-
-const OPTIONS_TAB_STORAGE_KEY = "summarize:options-tab";
 
 export function createSidepanelFeedbackRuntime({
   panelState,
@@ -63,9 +62,10 @@ export function createSidepanelFeedbackRuntime({
     }),
   });
 
-  const openOptionsTab = (tabId: string) => {
+  const openOptionsTab = (tabId: string, logSource?: string) => {
     try {
-      storage?.setItem(OPTIONS_TAB_STORAGE_KEY, tabId);
+      storage?.setItem(optionsTabStorageKey, tabId);
+      if (logSource) storage?.setItem(optionsLogSourceStorageKey, logSource);
     } catch {
       // Continue opening options when local storage is unavailable.
     }
@@ -115,7 +115,7 @@ export function createSidepanelFeedbackRuntime({
       actionsBound = true;
       errorController.bindActions({
         onRetry: retryLastAction,
-        onOpenLogs: () => openOptionsTab("logs"),
+        onOpenLogs: () => openOptionsTab("logs", "stderr"),
       });
       slideNoticeRetryBtn.addEventListener("click", retrySlidesStream);
     },

@@ -2,11 +2,16 @@ import fs from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import path from "node:path";
 import { execCliWithInput } from "../cli-exec.js";
-import { parseCodexOutputFromJsonl, parseCodexUsageFromJsonl } from "../cli-provider-output.js";
+import {
+  parseCodexErrorFromJsonl,
+  parseCodexOutputFromJsonl,
+  parseCodexUsageFromJsonl,
+} from "../cli-provider-output.js";
 import type { CliRunResult, ResolvedCliRunOptions } from "./types.js";
 
 const CODEX_DEFAULT_MODEL = "gpt-5.5";
 const CODEX_GPT_FAST_ALIASES = new Set(["gpt-fast", "gpt-5.5-fast"]);
+const CODEX_MODEL_ALIASES = new Map([["gpt-5.6", "gpt-5.6-sol"]]);
 
 function hasConfigOverride(args: string[], key: string): boolean {
   for (let index = 0; index < args.length; index += 1) {
@@ -23,7 +28,10 @@ function resolveModelAndArgs(
   const normalized = requestedModel?.trim().toLowerCase() ?? "";
   if (!normalized) return { model: CODEX_DEFAULT_MODEL, extraArgs: providerExtraArgs };
   if (!CODEX_GPT_FAST_ALIASES.has(normalized)) {
-    return { model: requestedModel, extraArgs: providerExtraArgs };
+    return {
+      model: CODEX_MODEL_ALIASES.get(normalized) ?? requestedModel,
+      extraArgs: providerExtraArgs,
+    };
   }
   const extraArgs = [...providerExtraArgs];
   if (!hasConfigOverride(extraArgs, "service_tier")) {
@@ -75,6 +83,7 @@ export async function runCodexCli(options: ResolvedCliRunOptions): Promise<CliRu
       env: isolatedHome ? { ...options.env, CODEX_HOME: isolatedHome } : options.env,
       cwd: isolatedCwd ?? options.cwd,
       signal: options.signal,
+      extractErrorMessage: parseCodexErrorFromJsonl,
     });
     const { usage, costUsd } = parseCodexUsageFromJsonl(stdout);
     const fileText = await fs

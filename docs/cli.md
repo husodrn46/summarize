@@ -28,6 +28,7 @@ Summarize can use installed CLIs (Claude, Codex, Gemini, Cursor Agent, OpenClaw,
 
 Use `--cli [provider]` (case-insensitive) for the provider default, or `--model cli/<provider>/<model>` to pin a model.
 Bare `cli/codex` defaults to GPT-5.5; set `cli.codex.model` to override it.
+`cli/codex/gpt-5.6` is an alias for `cli/codex/gpt-5.6-sol`; use `gpt-5.6-terra` explicitly to select Terra.
 Antigravity does not support per-call model selection in print mode, so use `cli/agy` without a model suffix. pi supports `cli/pi/<model>` or a configured `cli.pi.model`.
 If `--cli` is provided without a provider, auto selection is used with CLI enabled.
 

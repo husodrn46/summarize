@@ -143,3 +143,46 @@ export function parseCodexOutputFromJsonl(output: string): {
   const deltaText = deltaParts.join("").trim();
   return { text: deltaText || fullText, sawStructuredEvent };
 }
+
+function unwrapCodexErrorMessage(value: unknown): string | null {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const message = value.trim();
+  if (!message.startsWith("{")) return message;
+  try {
+    const parsed = JSON.parse(message) as Record<string, unknown>;
+    const nested = parsed.error;
+    if (nested && typeof nested === "object") {
+      const nestedMessage = (nested as Record<string, unknown>).message;
+      if (typeof nestedMessage === "string" && nestedMessage.trim()) return nestedMessage.trim();
+    }
+  } catch {
+    // Preserve the original message when the nested payload is not valid JSON.
+  }
+  return message;
+}
+
+export function parseCodexErrorFromJsonl(output: string): string | null {
+  let errorMessage: string | null = null;
+  for (const line of output.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith("{")) continue;
+    try {
+      const parsed = JSON.parse(trimmed) as Record<string, unknown>;
+      const type = typeof parsed.type === "string" ? parsed.type : "";
+      if (type === "error") {
+        errorMessage = unwrapCodexErrorMessage(parsed.message) ?? errorMessage;
+        continue;
+      }
+      if (type === "turn.failed") {
+        const error = parsed.error;
+        if (error && typeof error === "object") {
+          errorMessage =
+            unwrapCodexErrorMessage((error as Record<string, unknown>).message) ?? errorMessage;
+        }
+      }
+    } catch {
+      // Ignore malformed JSON lines.
+    }
+  }
+  return errorMessage;
+}

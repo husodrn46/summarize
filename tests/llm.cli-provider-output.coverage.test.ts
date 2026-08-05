@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isJsonCliProvider,
+  parseCodexErrorFromJsonl,
   parseCodexOutputFromJsonl,
   parseCodexUsageFromJsonl,
   parseJsonProviderOutput,
@@ -103,6 +104,27 @@ describe("CLI provider output parser coverage", () => {
       text: null,
       sawStructuredEvent: true,
     });
+  });
+
+  it("extracts the final structured Codex failure message", () => {
+    expect(
+      parseCodexErrorFromJsonl(
+        [
+          "plain",
+          "{bad}",
+          JSON.stringify({ type: "error", message: "early failure" }),
+          JSON.stringify({
+            type: "turn.failed",
+            error: {
+              message: JSON.stringify({
+                error: { message: "The requested model is not available." },
+              }),
+            },
+          }),
+        ].join("\n"),
+      ),
+    ).toBe("The requested model is not available.");
+    expect(parseCodexErrorFromJsonl("plain\n{bad}" as string)).toBeNull();
   });
 
   it("parses OpenCode text, usage, costs, errors, and fallback output", () => {

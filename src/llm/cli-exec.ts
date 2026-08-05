@@ -95,6 +95,7 @@ export async function execCliWithInput({
   cwd,
   signal,
   redactedCommand,
+  extractErrorMessage,
 }: {
   execFileImpl: ExecFileFn;
   cmd: string;
@@ -105,6 +106,7 @@ export async function execCliWithInput({
   cwd?: string;
   signal?: AbortSignal;
   redactedCommand?: string;
+  extractErrorMessage?: (stdout: string) => string | null;
 }): Promise<{ stdout: string; stderr: string }> {
   return await new Promise((resolve, reject) => {
     let interruptedSignal: NodeJS.Signals | null = null;
@@ -161,6 +163,9 @@ export async function execCliWithInput({
           // A sensitive argv value may be transformed or truncated before a CLI echoes it.
           // Suppress all child diagnostics instead of attempting unsafe substring redaction.
           const stderrText = redactedCommand ? "" : toUtf8String(stderr);
+          const stdoutErrorMessage = redactedCommand
+            ? ""
+            : (extractErrorMessage?.(toUtf8String(stdout)) ?? "").trim();
           if (aborted && signal) {
             reject(abortReason(signal));
             return;
@@ -185,9 +190,10 @@ export async function execCliWithInput({
             const errorMessage = redactedCommand
               ? `CLI command failed: ${redactedCommand}`
               : getExecErrorMessage(error);
+            const messageWithStderr = formatErrorMessageWithStderr(errorMessage, stderrText);
             reject(
               new Error(
-                formatErrorMessageWithStderr(errorMessage, stderrText),
+                formatErrorMessageWithStderr(messageWithStderr, stdoutErrorMessage, "\n"),
                 errorOptions(error, redactedCommand),
               ),
             );

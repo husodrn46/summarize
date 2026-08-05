@@ -185,8 +185,9 @@ describe("sidepanel feedback runtime", () => {
 
     harness.panelErrorLogsBtn.click();
     harness.inlineErrorLogsBtn.click();
-    expect(harness.storage.setItem).toHaveBeenCalledTimes(2);
+    expect(harness.storage.setItem).toHaveBeenCalledTimes(4);
     expect(harness.storage.setItem).toHaveBeenCalledWith("summarize:options-tab", "logs");
+    expect(harness.storage.setItem).toHaveBeenCalledWith("summarize:options-log-source", "stderr");
     expect(harness.sendOpenOptions).toHaveBeenCalledTimes(2);
 
     harness.runtime.errorController.showInlineError("Inline failure");

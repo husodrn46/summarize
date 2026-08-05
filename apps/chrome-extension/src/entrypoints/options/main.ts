@@ -1,9 +1,10 @@
 import type { CacheStats } from "@steipete/summarize-core/runtime";
+import { getLocalStorage } from "../../lib/local-storage";
 import { defaultSettings, loadSettings, saveSettings } from "../../lib/settings";
 import { applyTheme, type ColorMode, type ColorScheme } from "../../lib/theme";
 import { bindOptionsInputs } from "./bindings";
 import { createBooleanSettingsRuntime } from "./boolean-settings";
-import { languagePresets, optionsTabStorageKey } from "./constants";
+import { languagePresets, optionsLogSourceStorageKey, optionsTabStorageKey } from "./constants";
 import { createDaemonCapabilityController } from "./daemon-capability";
 import { createDaemonStatusChecker } from "./daemon-status";
 import { getOptionsElements } from "./elements";
@@ -161,6 +162,14 @@ const loadSkillsTab = () => {
     setStatus(`Failed to load skills: ${error instanceof Error ? error.message : String(error)}`);
   });
 };
+
+const requestedLogSource = getLocalStorage()?.getItem(optionsLogSourceStorageKey);
+if (
+  requestedLogSource &&
+  Array.from(logsSourceEl.options).some((option) => option.value === requestedLogSource)
+) {
+  logsSourceEl.value = requestedLogSource;
+}
 
 const logsViewer = createLogsViewer({
   elements: {

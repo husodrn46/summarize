@@ -473,6 +473,42 @@ describe("runCliModel", () => {
     expect(seenArgs[seenArgs.indexOf("-m") + 1]).toBe("gpt-5.5");
   });
 
+  it("maps the plain Codex GPT-5.6 model to Sol", async () => {
+    let seenArgs: string[] = [];
+    const execFileImpl: ExecFileFn = ((_cmd, args, _options, cb) => {
+      seenArgs = [...args];
+      const outputIndex = args.indexOf("--output-last-message");
+      const outputPath = outputIndex === -1 ? null : args[outputIndex + 1];
+      if (!outputPath) {
+        cb?.(new Error("missing output path"), "", "");
+        return {
+          stdin: { write: () => {}, end: () => {} },
+        } as unknown as ReturnType<ExecFileFn>;
+      }
+      void fs.writeFile(outputPath, "ok", "utf8").then(
+        () => cb?.(null, "", ""),
+        (error) => cb?.(error as Error, "", ""),
+      );
+      return {
+        stdin: { write: () => {}, end: () => {} },
+      } as unknown as ReturnType<ExecFileFn>;
+    }) as ExecFileFn;
+
+    const result = await runCliModel({
+      provider: "codex",
+      prompt: "Test",
+      model: "gpt-5.6",
+      allowTools: false,
+      timeoutMs: 1000,
+      env: {},
+      execFileImpl,
+      config: null,
+    });
+
+    expect(result.text).toBe("ok");
+    expect(seenArgs[seenArgs.indexOf("-m") + 1]).toBe("gpt-5.6-sol");
+  });
+
   it("isolates Codex summary runs from user config and repo rules", async () => {
     const sourceCodexHome = await fs.mkdtemp(path.join(tmpdir(), "summarize-codex-source-"));
     await fs.writeFile(path.join(sourceCodexHome, "auth.json"), '{"token":"ok"}', "utf8");
