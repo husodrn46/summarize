@@ -73,6 +73,19 @@ vi.mock("../src/run/slides-render.js", async () => {
 });
 
 describe("cli slides mode", () => {
+  it("strips the locale option before parsing slides arguments", async () => {
+    const stdout = collectStream({ isTTY: false });
+    const stderr = collectStream({ isTTY: false });
+    await runCli(["slides", "https://example.com/video.mp4", "--locale", "tr"], {
+      env: {},
+      fetch: vi.fn() as unknown as typeof fetch,
+      stdout: stdout.stream,
+      stderr: stderr.stream,
+    });
+
+    expect(mocks.extractSlidesForSource).toHaveBeenCalled();
+  });
+
   afterEach(() => {
     renderMocks.renderSlidesInline.mockClear();
     mocks.extractSlidesForSource.mockClear();

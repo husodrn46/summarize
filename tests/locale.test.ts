@@ -81,21 +81,29 @@ describe("extension locale", () => {
 
   it("translates existing and later UI nodes without touching ignored content", async () => {
     document.body.innerHTML = `
-      <button id="retry" title="Try again">Try again</button>
-      <div id="dynamic"></div>
-      <div data-locale-ignore="true"><span>Try again</span></div>
+      <main data-locale-ui>
+        <button id="retry" title="Try again">Try again</button>
+        <div id="dynamic"></div>
+        <div data-locale-ignore="true"><span>Try again</span></div>
+      </main>
+      <div id="content">Try again</div>
     `;
     const stop = applyExtensionLocale("tr");
     expect(getActiveExtensionLocale()).toBe("tr");
     expect(document.querySelector("#retry")?.textContent).toBe("Tekrar dene");
     expect(document.querySelector("#retry")?.getAttribute("title")).toBe("Tekrar dene");
     expect(document.querySelector("[data-locale-ignore]")?.textContent?.trim()).toBe("Try again");
+    expect(document.querySelector("#content")?.textContent).toBe("Try again");
 
     const dynamic = document.querySelector<HTMLElement>("#dynamic");
     if (!dynamic) throw new Error("dynamic test node missing");
     dynamic.textContent = "Loading logs…";
+    const content = document.querySelector<HTMLElement>("#content");
+    if (!content) throw new Error("content test node missing");
+    content.textContent = "Loading logs…";
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(dynamic.textContent).toBe("Günlükler yükleniyor…");
+    expect(content.textContent).toBe("Loading logs…");
 
     stop();
     applyExtensionLocale("en")();

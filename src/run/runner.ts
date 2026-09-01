@@ -152,7 +152,15 @@ async function handleImmediateCliRequests(options: {
   ) {
     return true;
   }
-  if (await handleSlidesCliRequest({ normalizedArgv, envForRun, fetchImpl, stdout, stderr })) {
+  if (
+    await handleSlidesCliRequest({
+      normalizedArgv: preSeparatorArgv,
+      envForRun,
+      fetchImpl,
+      stdout,
+      stderr,
+    })
+  ) {
     return true;
   }
   if (

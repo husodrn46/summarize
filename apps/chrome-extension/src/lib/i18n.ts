@@ -561,9 +561,12 @@ const lastTranslatedText = new WeakMap<Text, string>();
 const originalAttributes = new WeakMap<Element, Map<string, string>>();
 const lastTranslatedAttributes = new WeakMap<Element, Map<string, string>>();
 
-function shouldSkip(node: Node): boolean {
-  const parent = node.parentElement;
-  return Boolean(parent?.closest("code, pre, script, style, [data-locale-ignore]"));
+function isApplicationUi(node: Node): boolean {
+  const element = node instanceof Element ? node : node.parentElement;
+  return Boolean(
+    element?.closest("[data-locale-ui]") &&
+    !element.closest("code, pre, script, style, [data-locale-ignore]"),
+  );
 }
 
 /** Apply the selected locale to static HTML and to later-rendered extension UI nodes. */
@@ -573,7 +576,7 @@ export function applyExtensionLocale(locale: ExtensionLocale): () => void {
   document.documentElement.lang = locale;
   const translateTextNode = (textNode: Text) => {
     const current = textNode.nodeValue ?? "";
-    if (!current.trim() || shouldSkip(textNode)) return;
+    if (!current.trim() || !isApplicationUi(textNode)) return;
     const source = originalText.get(textNode);
     const lastTranslated = lastTranslatedText.get(textNode);
     const resolvedSource =
@@ -587,6 +590,7 @@ export function applyExtensionLocale(locale: ExtensionLocale): () => void {
     lastTranslatedText.set(textNode, translated);
   };
   const translateElementAttributes = (element: Element) => {
+    if (!isApplicationUi(element)) return;
     for (const attribute of TRANSLATABLE_ATTRIBUTES) {
       const value = element.getAttribute(attribute);
       if (!value) continue;
@@ -612,7 +616,7 @@ export function applyExtensionLocale(locale: ExtensionLocale): () => void {
     const textNodes: Text[] = [];
     let node: Node | null;
     while ((node = walker.nextNode())) {
-      if (node.nodeValue?.trim() && !shouldSkip(node)) textNodes.push(node as Text);
+      if (node.nodeValue?.trim() && isApplicationUi(node)) textNodes.push(node as Text);
     }
     for (const textNode of textNodes) translateTextNode(textNode);
 
