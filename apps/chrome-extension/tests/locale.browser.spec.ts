@@ -1,3 +1,5 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 import {
   closeExtension,
@@ -6,6 +8,11 @@ import {
   openExtensionPage,
   seedSettings,
 } from "./helpers/extension-harness";
+
+const proofScreenshotPath = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../../../docs/assets/pr398-turkish-options.png",
+);
 
 test("options renders Turkish interface without rewriting user skill metadata", async ({}, testInfo) => {
   const harness = await launchExtension(getBrowserFromProject(testInfo.project.name));
@@ -43,8 +50,11 @@ test("options renders Turkish interface without rewriting user skill metadata", 
     await expect(page.locator("#languagePreset option[value=tr]")).toHaveText("Türkçe");
     await expect(page.locator("#uiLocale")).toHaveValue("tr");
     await page.click("#tab-skills");
+    await expect(page.locator("#panel-skills h2")).toHaveText("Otomasyon yetenekleri");
     await expect(page.locator(".skillName").filter({ hasText: "Delete" })).toHaveText("Delete");
+    await expect(page.locator(".skillDomains")).toHaveText("example.com");
     await expect(page.locator(".skillDescription")).toHaveText("Try again");
+    await page.locator("main").screenshot({ path: proofScreenshotPath });
   } finally {
     await closeExtension(harness.context, harness.userDataDir);
   }
