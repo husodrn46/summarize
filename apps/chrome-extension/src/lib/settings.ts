@@ -1,5 +1,6 @@
 import type { SummarizeRequestOverrides } from "@steipete/summarize-core/runtime";
 import { enforceDaemonPolicy, readDaemonPolicy } from "./daemon-policy";
+import type { ExtensionLocaleSetting } from "./i18n";
 import { readStoredSettings, writeStoredSettings } from "./settings-storage";
 import {
   type ColorMode,
@@ -18,6 +19,7 @@ type YoutubeModeSetting = "" | NonNullable<SummarizeRequestOverrides["youtube"]>
 type TranscriberSetting = "" | NonNullable<SummarizeRequestOverrides["transcriber"]>;
 
 export type Settings = {
+  uiLocale: ExtensionLocaleSetting;
   token: string;
   daemonPort: string;
   summaryRuntime: SummaryRuntime;
@@ -140,6 +142,14 @@ function normalizeLanguage(value: unknown): string {
   const trimmed = value.trim();
   if (!trimmed) return defaultSettings.language;
   return trimmed;
+}
+
+function normalizeUiLocale(value: unknown): ExtensionLocaleSetting {
+  if (typeof value !== "string") return defaultSettings.uiLocale;
+  const normalized = value.trim().toLowerCase();
+  return normalized === "tr" || normalized === "en" || normalized === "auto"
+    ? normalized
+    : defaultSettings.uiLocale;
 }
 
 function normalizePromptOverride(value: unknown): string {
@@ -383,6 +393,7 @@ export function normalizeDaemonPort(value: unknown): string {
 }
 
 export const defaultSettings: Settings = {
+  uiLocale: "auto",
   token: "",
   daemonPort: DEFAULT_DAEMON_PORT,
   summaryRuntime: "direct",
@@ -444,6 +455,7 @@ export async function loadSettings(): Promise<EffectiveSettings> {
     model: normalizeModel(raw.model, raw),
     length: normalizeLength(raw.length),
     language: normalizeLanguage(raw.language),
+    uiLocale: normalizeUiLocale(raw.uiLocale),
     promptOverride: normalizePromptOverride(raw.promptOverride),
     autoSummarize:
       typeof raw.autoSummarize === "boolean" ? raw.autoSummarize : defaultSettings.autoSummarize,

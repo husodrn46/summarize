@@ -13,6 +13,7 @@ import {
   type ExtractedLinkContent,
 } from "../../../content/index.js";
 import { createFirecrawlScraper } from "../../../firecrawl.js";
+import { resolveCliLocaleFromEnv, translateCliText } from "../../../locale.js";
 import {
   identifySpeakersInExtractedContent,
   rememberSpeakerMappings,
@@ -304,7 +305,10 @@ See: summarize transcriber help`);
       }
       if (identified.warning) {
         writeVerbose(ctx.stderr, ctx.verbose, identified.warning, ctx.verboseColor, ctx.envForRun);
-        ctx.stderr.write(`Warning: ${identified.warning}\n`);
+        const locale = resolveCliLocaleFromEnv(ctx.envForRun);
+        ctx.stderr.write(
+          `${translateCliText("Warning:", locale)} ${translateCliText(identified.warning, locale)}\n`,
+        );
       }
       if (ctx.speakerIdentification.remember) {
         if (!ctx.configPath || !identified.transcriptHash) {

@@ -1,3 +1,4 @@
+import { applyExtensionLocale, resolveExtensionLocale } from "../../lib/i18n";
 import type { BgToPanel } from "../../lib/panel-contracts";
 import { defaultSettings, loadSettings, patchSettings } from "../../lib/settings";
 import { generateToken } from "../../lib/token";
@@ -21,6 +22,7 @@ import { registerSidepanelRuntimeTestHooks } from "./test-hooks-runtime";
 import { createTypographyController } from "./typography-controller";
 
 const dom = createSidepanelDom();
+applyExtensionLocale(resolveExtensionLocale());
 const {
   advancedBtn,
   advancedSettingsBodyEl,
@@ -309,6 +311,7 @@ bindSidepanelUiEvents({
 bootstrapSidepanel({
   ensurePanelPort: () => panelMessagingRuntime.ensure(),
   loadSettings,
+  applyLocale: (locale) => applyExtensionLocale(resolveExtensionLocale(locale)),
   panelState,
   dispatchPanelState: panelStateStore.dispatch,
   typographyController,

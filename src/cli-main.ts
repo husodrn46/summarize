@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { CommanderError } from "commander";
+import { resolveCliLocaleFromArgs, translateCliText } from "./locale.js";
 import { terminateTrackedProcesses } from "./processes.js";
 import { runCli } from "./run.js";
 
@@ -181,7 +182,7 @@ export async function runCliMain({
 
     const message =
       error instanceof Error ? error.message : error ? String(error) : "Unknown error";
-    stderr.write(`${stripAnsi(message)}\n`);
+    stderr.write(`${translateCliText(stripAnsi(message), resolveCliLocaleFromArgs(argv, env))}\n`);
     setExitCode(typeof exitCode === "number" ? exitCode : 1);
   } finally {
     cleanupSignalHandlers();

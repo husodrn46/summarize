@@ -5,6 +5,7 @@ import {
   type Skill,
   saveSkill,
 } from "../../automation/skills-store";
+import { getActiveExtensionLocale, translateExtensionText } from "../../lib/i18n";
 
 type SkillConflict = { skill: Skill; selected: boolean };
 
@@ -49,7 +50,10 @@ export function createSkillsController({
   };
 
   const deleteSkillWithPrompt = async (skill: Skill) => {
-    if (!confirm(`Delete skill "${skill.name}"?`)) return;
+    if (
+      !confirm(translateExtensionText(`Delete skill "${skill.name}"?`, getActiveExtensionLocale()))
+    )
+      return;
     await deleteSkill(skill.name);
     editingSkill = null;
     await loadSkills();

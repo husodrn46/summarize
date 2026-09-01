@@ -1,3 +1,4 @@
+import { resolveCliLocaleFromEnv, translateCliText } from "./locale.js";
 import {
   benchmarkOpenRouterModels,
   refineBenchmarkCandidates,
@@ -165,7 +166,9 @@ export async function refreshFree({
     candidates: selected,
     setDefault: resolved.setDefault,
   });
-  stdout.write(`Wrote ${configPath} (models.free)\n`);
+  stdout.write(
+    `${translateCliText(`Wrote ${configPath} (models.free)`, resolveCliLocaleFromEnv(env))}\n`,
+  );
 
   reporter.selectedModels(selectedIds, refined);
 }

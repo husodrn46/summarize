@@ -2,6 +2,7 @@ import { CommanderError } from "commander";
 import { resolveEnvState } from "../application/environment-state.js";
 import { loadSummarizeConfig } from "../config.js";
 import { parseDurationMs } from "../flags.js";
+import { resolveCliLocaleFromArgs, translateCliText } from "../locale.js";
 import {
   extractSlidesForSource,
   resolveSlideSettings,
@@ -58,13 +59,15 @@ export async function handleSlidesCliRequest({
 }: SlidesCliContext): Promise<boolean> {
   if (normalizedArgv[0]?.toLowerCase() !== "slides") return false;
 
+  const locale = resolveCliLocaleFromArgs(normalizedArgv, envForRun);
+  const localize = (text: string) => translateCliText(text, locale);
   const program = buildSlidesProgram();
   program.configureOutput({
     writeOut(str) {
-      stdout.write(str);
+      stdout.write(localize(str));
     },
     writeErr(str) {
-      stderr.write(str);
+      stderr.write(localize(str));
     },
   });
   applyHelpStyle(program, envForRun, stdout);
@@ -157,16 +160,17 @@ export async function handleSlidesCliRequest({
     enabled: progressEnabled,
     trueColor: resolveTrueColor(envForRun),
   });
-  const renderStatus = (label: string, detail = "…") => `${theme.label(label)}${theme.dim(detail)}`;
+  const renderStatus = (label: string, detail = "…") =>
+    `${theme.label(localize(label))}${theme.dim(detail)}`;
   const renderStatusFromText = (text: string) => {
     const match = text.match(/^([^:]+):(.*)$/);
     if (!match) return renderStatus(text);
     const [, prefix, rest] = match;
-    return `${theme.label(prefix.trim())}${theme.dim(`:${rest}`)}`;
+    return `${theme.label(localize(prefix.trim()))}${theme.dim(`:${rest}`)}`;
   };
   const oscProgress = progressEnabled
     ? createOscProgressController({
-        label: "Slides",
+        label: localize("Slides"),
         env: envForRun,
         isTty: progressEnabled,
         write: (data: string) => stderr.write(data),
@@ -216,7 +220,7 @@ export async function handleSlidesCliRequest({
       return;
     }
     if (verboseEnabled) {
-      stderr.write(`${text}\n`);
+      stderr.write(`${localize(text)}\n`);
     }
   };
 
@@ -253,8 +257,8 @@ export async function handleSlidesCliRequest({
   }
 
   const count = slidesExtracted.slides.length;
-  stdout.write(`Slides extracted: ${count}\n`);
-  stdout.write(`Slides dir: ${slidesExtracted.slidesDir}\n`);
+  stdout.write(`${localize("Slides extracted:")} ${count}\n`);
+  stdout.write(`${localize("Slides dir:")} ${slidesExtracted.slidesDir}\n`);
 
   if (renderMode !== "none") {
     if (!isRichTty(stdout)) {
@@ -266,7 +270,7 @@ export async function handleSlidesCliRequest({
       env: envForRun,
       stdout,
       labelForSlide: (slide) =>
-        `Slide ${slide.index} · ${formatTimestamp(slide.timestamp)} (${slide.imagePath})`,
+        localize(`Slide ${slide.index} · ${formatTimestamp(slide.timestamp)} (${slide.imagePath})`),
     });
     return true;
   }

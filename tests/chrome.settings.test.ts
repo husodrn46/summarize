@@ -45,6 +45,14 @@ describe("chrome/settings", () => {
     expect(loaded.language).toBe("German");
   });
 
+  it("persists and normalizes the extension interface locale", async () => {
+    await patchSettings({ uiLocale: "tr" });
+    expect((await loadSettings()).uiLocale).toBe("tr");
+
+    storage.settings = { uiLocale: "fr" };
+    expect((await loadSettings()).uiLocale).toBe("auto");
+  });
+
   it("patches settings and persists them", async () => {
     await patchSettings({ token: "x", length: "20k", language: "en" });
     const loaded = await loadSettings();

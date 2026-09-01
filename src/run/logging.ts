@@ -1,3 +1,4 @@
+import { resolveCliLocaleFromEnv, translateCliText } from "../locale.js";
 import {
   createThemeRenderer,
   resolveThemeNameFromSources,
@@ -25,7 +26,7 @@ export function writeVerbose(
         })
       : null;
   const prefix = theme ? theme.accent(VERBOSE_PREFIX) : ansi("36", VERBOSE_PREFIX, color);
-  stderr.write(`${prefix} ${message}\n`);
+  stderr.write(`${prefix} ${translateCliText(message, resolveCliLocaleFromEnv(env ?? {}))}\n`);
 }
 
 export function createRetryLogger({
