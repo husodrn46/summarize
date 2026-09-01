@@ -1,10 +1,12 @@
 # PR #398 kanıt kaydı
 
-Bu kayıt, `fccd6a6e0bc27e6c1e5a8afabb90dfbb4ab0e0a2` HEAD’i üzerinde PR #398 için
+Bu kayıt, PR #398’in ürün davranışının doğrulandığı `fccd6a6e0bc27e6c1e5a8afabb90dfbb4ab0e0a2`
+HEAD’i ve bu kanıt paketini ekleyen `37e791deb01b1bcff1bc29ec695c17d3ff1305d2` commit’i için
 ClawSweeper’ın istediği Türkçe CLI ve Chromium extension davranış kanıtlarını toplar.
 
 - Tarih/saat: 2026-09-01, Europe/Istanbul (`+03:00`)
-- Test edilen HEAD: `fccd6a6e0bc27e6c1e5a8afabb90dfbb4ab0e0a2`
+- Davranış testlerinin çalıştırıldığı HEAD: `fccd6a6e0bc27e6c1e5a8afabb90dfbb4ab0e0a2`
+- Kanıt paketinin commit’i: `37e791deb01b1bcff1bc29ec695c17d3ff1305d2`
 - HEAD konusu: `fix: preserve saved skill metadata in Turkish UI`
 - Kanıt checkout’u: repository root; aşağıdaki dosya ve komut yolları repo-relative’dir.
 - Secret, API key, kullanıcı hesabı veya gerçek kullanıcı verisi kullanılmadı.
@@ -120,7 +122,7 @@ olarak sayılmadı. Gerekli yerel test sunucusu izniyle tekrar çalıştırılan
 ## PR body’ye eklenecek kısa metin
 
 ```md
-Verified on commit `fccd6a6e0bc27e6c1e5a8afabb90dfbb4ab0e0a2`:
+Verified on PR head; behavior tests were run on code commit `fccd6a6e0bc27e6c1e5a8afabb90dfbb4ab0e0a2`:
 
 - `SUMMARIZE_LOCALE=tr pnpm dev:cli --help` exits 0 and shows Turkish `Kullanım`, `Argümanlar`, `Seçenekler`, `--slides`, and `--locale` text.
 - Local, network-free slide/parser fixture tests pass: 4 files / 16 tests.
