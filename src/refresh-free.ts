@@ -167,7 +167,7 @@ export async function refreshFree({
     setDefault: resolved.setDefault,
   });
   stdout.write(
-    `${translateCliText(`Wrote ${configPath} (models.free)`, resolveCliLocaleFromEnv(env))}\n`,
+    `${translateCliText("Wrote ", resolveCliLocaleFromEnv(env))}${configPath} (models.free)\n`,
   );
 
   reporter.selectedModels(selectedIds, refined);

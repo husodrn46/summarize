@@ -29,6 +29,10 @@ export function stripCliLocaleArgs(argv: readonly string[]): string[] {
   const stripped: string[] = [];
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
+    if (arg === "--") {
+      stripped.push(...argv.slice(index));
+      break;
+    }
     if (arg === "--locale") {
       index += 1;
       continue;

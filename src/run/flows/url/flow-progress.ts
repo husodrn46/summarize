@@ -1,4 +1,8 @@
-import { resolveCliLocaleFromEnv, translateCliText } from "../../../locale.js";
+import {
+  hasTurkishTranslation,
+  resolveCliLocaleFromEnv,
+  translateCliText,
+} from "../../../locale.js";
 import { createOscProgressController } from "../../../tty/osc-progress.js";
 import { startSpinner } from "../../../tty/spinner.js";
 import type { createThemeRenderer } from "../../../tty/theme.js";
@@ -71,8 +75,8 @@ export function createUrlFlowProgress({
     `${styleLabel(localize(label))} ${meta}${styleDim(suffix)}`;
   const renderStatusFromText = (text: string) => {
     const match = text.match(/^([^:]+):(.*)$/);
-    if (!match) return styleLabel(localize(text));
-    return `${styleLabel(localize(match[1]))}${styleDim(`:${match[2]}`)}`;
+    if (!match) return styleLabel(hasTurkishTranslation(text) ? localize(text) : text);
+    return `${styleLabel(hasTurkishTranslation(match[1]) ? localize(match[1]) : match[1])}${styleDim(`:${match[2]}`)}`;
   };
   const progressStatus = createUrlProgressStatus({
     enabled: flags.progressEnabled,

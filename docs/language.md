@@ -60,3 +60,11 @@ the command-line interface. Use `--locale tr` (or `SUMMARIZE_LOCALE=tr`) for
 Turkish help, progress, and status text. The CLI remains English by default;
 unknown locales fall back to English. Command names, flags, model/provider IDs,
 URLs, paths, and protocol identifiers are never translated.
+Raw diagnostics and provider error messages retain their original text.
+
+## Extension interface language
+
+Choose English, Turkish, or Automatic under Options → User interface. Existing
+profiles keep English until you choose a locale; fresh installations use the
+browser language. The setting updates an already-open side panel immediately.
+It does not translate summary content, user data, or diagnostic log payloads.

@@ -299,9 +299,7 @@ export function createUrlExtractionSession({
             io.envForRun,
           );
           const locale = resolveCliLocaleFromEnv(io.envForRun);
-          io.stderr.write(
-            `${translateCliText("Warning:", locale)} ${translateCliText(identified.warning, locale)}\n`,
-          );
+          io.stderr.write(`${translateCliText("Warning:", locale)} ${identified.warning}\n`);
         }
         if (flags.speakerIdentification.remember) {
           if (!flags.configPath || !identified.transcriptHash) {

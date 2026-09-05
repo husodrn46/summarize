@@ -26,6 +26,8 @@ describe("locale selection and fallback", () => {
     expect(resolveCliLocaleFromEnv({ LANG: "tr_TR.UTF-8" })).toBe("en");
     expect(resolveCliLocaleFromArgs(["--locale", "tr"], {})).toBe("tr");
     expect(resolveCliLocaleFromArgs(["--locale=tr"], {})).toBe("tr");
+    expect(resolveCliLocaleFromArgs(["--", "--locale=tr"], {})).toBe("en");
+    expect(resolveCliLocaleFromArgs(["--locale", "tr", "--", "--locale=en"], {})).toBe("tr");
   });
 
   it("translates representative CLI text without touching technical identifiers", () => {
@@ -53,6 +55,37 @@ describe("locale selection and fallback", () => {
     expect(extensionTranslationKeys.length).toBeGreaterThan(80);
     expect(hasTurkishTranslation("Try again")).toBe(true);
     expect(hasTurkishTranslation("provider/model")).toBe(false);
+  });
+
+  it.each([
+    "/home/me/Copy failed/slide.png",
+    "C:\\Users\\me\\Copy failed\\slide.png",
+    "./Copy failed/slide.png",
+    "cache/result.json",
+    "Copy failed/slide.png",
+    "Loading cache/slide.png",
+    "cache.json",
+    "Copy failed.txt",
+    "/home/me/Projects (old)/config.json",
+    "/home/me/Projects, old;/config.json",
+    "https://example.com/Copy%20failed/slide.png",
+  ])("preserves technical paths before multiword replacements: %s", (value) => {
+    const translated = translateCliText(`Copy failed: (${value})`, "tr", [value]);
+    expect(translated).toBe(`Kopyalama başarısız: (${value})`);
+    expect(translateCliText(`Wrote ${value}`, "tr", [value])).toContain(value);
+  });
+
+  it("still translates fixed help descriptions containing a literal configuration path", () => {
+    const help =
+      "Output language: auto (match source), en, de, english, german, ... (default: auto; configurable in ~/.summarize/config.json via output.language)";
+    expect(translateCliText(help, "tr")).toContain("Çıktı dili:");
+    expect(translateCliText(help, "tr")).toContain("~/.summarize/config.json");
+    expect(translateCliText('Copy failed: "Copy failed"', "tr", ['"Copy failed"'])).toBe(
+      'Kopyalama başarısız: "Copy failed"',
+    );
+    expect(translateCliText("Wrote old/0.json", "tr", ["old/0.json", "0", ""])).toContain(
+      "old/0.json",
+    );
   });
 });
 

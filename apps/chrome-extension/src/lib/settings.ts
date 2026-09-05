@@ -144,12 +144,15 @@ function normalizeLanguage(value: unknown): string {
   return trimmed;
 }
 
-function normalizeUiLocale(value: unknown): ExtensionLocaleSetting {
-  if (typeof value !== "string") return defaultSettings.uiLocale;
+function normalizeUiLocale(
+  value: unknown,
+  fallback: ExtensionLocaleSetting = defaultSettings.uiLocale,
+): ExtensionLocaleSetting {
+  if (typeof value !== "string") return fallback;
   const normalized = value.trim().toLowerCase();
   return normalized === "tr" || normalized === "en" || normalized === "auto"
     ? normalized
-    : defaultSettings.uiLocale;
+    : fallback;
 }
 
 function normalizePromptOverride(value: unknown): string {
@@ -455,7 +458,10 @@ export async function loadSettings(): Promise<EffectiveSettings> {
     model: normalizeModel(raw.model, raw),
     length: normalizeLength(raw.length),
     language: normalizeLanguage(raw.language),
-    uiLocale: normalizeUiLocale(raw.uiLocale),
+    uiLocale: normalizeUiLocale(
+      raw.uiLocale,
+      Object.keys(raw).length === 0 ? defaultSettings.uiLocale : "en",
+    ),
     promptOverride: normalizePromptOverride(raw.promptOverride),
     autoSummarize:
       typeof raw.autoSummarize === "boolean" ? raw.autoSummarize : defaultSettings.autoSummarize,

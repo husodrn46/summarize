@@ -306,9 +306,7 @@ See: summarize transcriber help`);
       if (identified.warning) {
         writeVerbose(ctx.stderr, ctx.verbose, identified.warning, ctx.verboseColor, ctx.envForRun);
         const locale = resolveCliLocaleFromEnv(ctx.envForRun);
-        ctx.stderr.write(
-          `${translateCliText("Warning:", locale)} ${translateCliText(identified.warning, locale)}\n`,
-        );
+        ctx.stderr.write(`${translateCliText("Warning:", locale)} ${identified.warning}\n`);
       }
       if (ctx.speakerIdentification.remember) {
         if (!ctx.configPath || !identified.transcriptHash) {

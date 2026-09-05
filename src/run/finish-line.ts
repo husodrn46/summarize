@@ -93,8 +93,9 @@ export function writeFinishLine({
   const locale = resolveCliLocaleFromEnv(env ?? {});
 
   stderr.write("\n");
-  const line = translateCliText(text.line, locale);
-  const details = text.details ? translateCliText(text.details, locale) : null;
+  const protectedValues = model ? [formatModelLabelForDisplay(model)] : [];
+  const line = translateCliText(text.line, locale, protectedValues);
+  const details = text.details ? translateCliText(text.details, locale, protectedValues) : null;
   stderr.write(`${theme ? theme.success(line) : line}\n`);
   if (detailed && details) {
     stderr.write(`${theme ? theme.dim(details) : details}\n`);

@@ -34,10 +34,12 @@ export function resolveCliLocaleFromArgs(
   argv: readonly string[],
   env: Record<string, string | undefined>,
 ): CliLocale {
-  const equals = argv.find((arg) => arg.startsWith("--locale="));
+  const separatorIndex = argv.indexOf("--");
+  const optionArgs = separatorIndex === -1 ? argv : argv.slice(0, separatorIndex);
+  const equals = optionArgs.find((arg) => arg.startsWith("--locale="));
   if (equals) return resolveCliLocaleFromEnv(env, equals.slice("--locale=".length));
-  const index = argv.indexOf("--locale");
-  return resolveCliLocaleFromEnv(env, index >= 0 ? argv[index + 1] : undefined);
+  const index = optionArgs.indexOf("--locale");
+  return resolveCliLocaleFromEnv(env, index >= 0 ? optionArgs[index + 1] : undefined);
 }
 
 const TURKISH_TRANSLATIONS: ReadonlyArray<readonly [string, string]> = [
@@ -493,6 +495,7 @@ const TURKISH_TRANSLATIONS: ReadonlyArray<readonly [string, string]> = [
   ["Page", "Sayfa"],
   ["Video", "Video"],
   ["Slides", "Slaytlar"],
+  ["Slide", "Slayt"],
   ["Transcript", "Döküm"],
   ["OCR", "OCR"],
   ["Browser", "Tarayıcı"],
@@ -671,6 +674,19 @@ function escapeRegExp(value: string): string {
   return value.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function createValueProtector(input: readonly string[]) {
+  const values = [...new Set(input.filter(Boolean))].sort((a, b) => b.length - a.length);
+  const pattern = values.length > 0 ? new RegExp(values.map(escapeRegExp).join("|"), "g") : null;
+  return {
+    protect: (text: string) =>
+      pattern
+        ? text.replace(pattern, (value) => `\u0000value_${values.indexOf(value)}\u0000`)
+        : text,
+    restore: (text: string) =>
+      text.replace(/\u0000value_(\d+)\u0000/g, (_, index: string) => values[Number(index)] ?? ""),
+  };
+}
+
 function protectTechnicalTokens(text: string): {
   masked: string;
   restore: (value: string) => string;
@@ -709,17 +725,21 @@ function protectTechnicalTokens(text: string): {
   };
 }
 
-/** Translate known user-facing text while leaving paths, flags, URLs, and identifiers intact. */
-export function translateCliText(text: string, locale: CliLocale): string {
+/** Translate app-owned text; pass interpolated data as protectedValues to preserve it exactly. */
+export function translateCliText(
+  text: string,
+  locale: CliLocale,
+  protectedValues: readonly string[] = [],
+): string {
   if (locale === "en") return text;
-  let translated = text;
+  const values = createValueProtector(protectedValues);
+  let translated = values.protect(text);
   for (const [source, target] of TURKISH_TRANSLATIONS.toSorted(
     (a, b) => b[0].length - a[0].length,
   )) {
     const isSingleWord = /^[A-Za-z]+$/.test(source);
     if (isSingleWord) continue;
-    const sourcePattern = isSingleWord ? `\\b${escapeRegExp(source)}\\b` : escapeRegExp(source);
-    translated = translated.replace(new RegExp(sourcePattern, "g"), target);
+    translated = translated.replace(new RegExp(escapeRegExp(source), "g"), target);
     const wrappedPattern = source.trim().split(/\s+/).map(escapeRegExp).join("\\s+");
     translated = translated.replace(new RegExp(wrappedPattern, "g"), target);
   }
@@ -729,7 +749,7 @@ export function translateCliText(text: string, locale: CliLocale): string {
     if (!/^[A-Za-z]+$/.test(source)) continue;
     translated = translated.replace(new RegExp(`\\b${escapeRegExp(source)}\\b`, "g"), target);
   }
-  return protectedText.restore(translated);
+  return values.restore(protectedText.restore(translated));
 }
 
 export function hasTurkishTranslation(source: string): boolean {

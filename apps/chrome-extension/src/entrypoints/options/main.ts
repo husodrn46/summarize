@@ -109,8 +109,6 @@ const {
   logsLevelInputs,
 } = getOptionsElements();
 
-applyExtensionLocale(resolveExtensionLocale());
-
 const resolveActiveTab = () => resolveActiveOptionsTab(tabButtons);
 
 let isInitializing = true;

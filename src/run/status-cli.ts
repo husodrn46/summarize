@@ -447,8 +447,28 @@ export async function handleStatusCliRequest({
   if (normalizedArgv.includes("--json")) {
     stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   } else {
+    const protectedValues = [
+      report.model.selection,
+      report.config?.path,
+      ...report.presets.flatMap((preset) => [
+        preset.name,
+        preset.model,
+        ...(preset.candidates ?? []),
+      ]),
+      ...report.providers.flatMap((provider) => [
+        provider.path,
+        provider.model,
+        provider.endpoint,
+        provider.source,
+        ...(provider.models ?? []),
+      ]),
+    ].filter((value): value is string => typeof value === "string");
     stdout.write(
-      translateCliText(formatHumanStatus(report, normalizedArgv.includes("--verbose")), locale),
+      translateCliText(
+        formatHumanStatus(report, normalizedArgv.includes("--verbose")),
+        locale,
+        protectedValues,
+      ),
     );
   }
   return true;

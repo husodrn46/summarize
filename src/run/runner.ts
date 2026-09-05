@@ -154,7 +154,7 @@ async function handleImmediateCliRequests(options: {
   }
   if (
     await handleSlidesCliRequest({
-      normalizedArgv: preSeparatorArgv,
+      normalizedArgv: stripCliLocaleArgs(normalizedArgv),
       envForRun,
       fetchImpl,
       stdout,
@@ -190,7 +190,7 @@ function buildCliProgram(options: {
       stdout.write(translateCliText(str, locale));
     },
     writeErr(str) {
-      stderr.write(translateCliText(str, locale));
+      stderr.write(str);
     },
   });
   program.exitOverride();

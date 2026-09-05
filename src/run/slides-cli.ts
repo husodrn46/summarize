@@ -2,7 +2,7 @@ import { CommanderError } from "commander";
 import { resolveEnvState } from "../application/environment-state.js";
 import { loadSummarizeConfig } from "../config.js";
 import { parseDurationMs } from "../flags.js";
-import { resolveCliLocaleFromArgs, translateCliText } from "../locale.js";
+import { hasTurkishTranslation, resolveCliLocaleFromArgs, translateCliText } from "../locale.js";
 import {
   extractSlidesForSource,
   resolveSlideSettings,
@@ -67,7 +67,7 @@ export async function handleSlidesCliRequest({
       stdout.write(localize(str));
     },
     writeErr(str) {
-      stderr.write(localize(str));
+      stderr.write(str);
     },
   });
   applyHelpStyle(program, envForRun, stdout);
@@ -164,9 +164,10 @@ export async function handleSlidesCliRequest({
     `${theme.label(localize(label))}${theme.dim(detail)}`;
   const renderStatusFromText = (text: string) => {
     const match = text.match(/^([^:]+):(.*)$/);
-    if (!match) return renderStatus(text);
+    if (!match) return hasTurkishTranslation(text) ? renderStatus(text) : theme.label(text);
     const [, prefix, rest] = match;
-    return `${theme.label(localize(prefix.trim()))}${theme.dim(`:${rest}`)}`;
+    const label = prefix.trim();
+    return `${theme.label(hasTurkishTranslation(label) ? localize(label) : label)}${theme.dim(`:${rest}`)}`;
   };
   const oscProgress = progressEnabled
     ? createOscProgressController({
@@ -220,7 +221,7 @@ export async function handleSlidesCliRequest({
       return;
     }
     if (verboseEnabled) {
-      stderr.write(`${localize(text)}\n`);
+      stderr.write(`${text}\n`);
     }
   };
 
@@ -270,7 +271,7 @@ export async function handleSlidesCliRequest({
       env: envForRun,
       stdout,
       labelForSlide: (slide) =>
-        localize(`Slide ${slide.index} · ${formatTimestamp(slide.timestamp)} (${slide.imagePath})`),
+        `${localize("Slide")} ${slide.index} · ${formatTimestamp(slide.timestamp)} (${slide.imagePath})`,
     });
     return true;
   }

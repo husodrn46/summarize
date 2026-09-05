@@ -49,7 +49,7 @@ export function handleHelpRequest({
         stdout.write(translateCliText(str, locale));
       },
       writeErr(str) {
-        stderr.write(translateCliText(str, locale));
+        stderr.write(str);
       },
     });
     applyHelpStyle(slidesProgram, envForRun, stdout);
@@ -67,7 +67,7 @@ export function handleHelpRequest({
       stdout.write(translateCliText(str, locale));
     },
     writeErr(str) {
-      stderr.write(translateCliText(str, locale));
+      stderr.write(str);
     },
   });
   attachRichHelp(program, envForRun, stdout);

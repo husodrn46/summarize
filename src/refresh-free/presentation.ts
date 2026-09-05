@@ -62,7 +62,7 @@ export class RefreshFreeReporter {
   }
 
   #dim(text: string) {
-    return this.#ansi("2", translateCliText(text, this.#locale));
+    return this.#ansi("2", text);
   }
 
   #commandName() {
@@ -184,7 +184,7 @@ export class RefreshFreeReporter {
   }) {
     if (!this.#verbose) return;
     this.#note(
-      `${this.#ansi("1;31", translateCliText("fail", this.#locale))} ${modelId} ${this.#dim(`(${kind})`)}: ${translateCliText(message, this.#locale)}`,
+      `${this.#ansi("1;31", translateCliText("fail", this.#locale))} ${modelId} ${this.#dim(`(${kind})`)}: ${message}`,
     );
   }
 

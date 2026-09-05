@@ -22,7 +22,6 @@ import { registerSidepanelRuntimeTestHooks } from "./test-hooks-runtime";
 import { createTypographyController } from "./typography-controller";
 
 const dom = createSidepanelDom();
-applyExtensionLocale(resolveExtensionLocale());
 const {
   advancedBtn,
   advancedSettingsBodyEl,
